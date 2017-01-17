@@ -1,4 +1,4 @@
-var initial_board = { // board object
+var initial_board = { // board object, define the whole board position array
     a1:null,a2:null,a3:null,a4:null,
     b1:null,b2:null,b3:null,b4:null,
     c1:null,c2:null,c3:null,c4:null,
@@ -7,7 +7,7 @@ var initial_board = { // board object
 
 function available_spaces(board){
     return Object.keys(board).filter(function(key){
-        return board[key] == null
+        return board[key] == null // find the vacant position
     });
 }
 
@@ -51,12 +51,12 @@ function same_board(board1, board2){
 
 function fold_line(board, line){
     var tiles = line.map(function(key){
-        return board[key];
+        return board[key]; // trasform key array to value array
     }).filter(function(tile){
-        return tile !== null
+        return tile !== null // filter the occupied position
     });
     var new_tiles = [];
-    if(tiles){
+    if(tiles){  // there are tiles which position were occupied
         //must loop so we can skip next if matched
         for(var i=0; i < tiles.length; i++){
             var tile = tiles[i];
@@ -96,11 +96,17 @@ function fold_order(xs, ys, reverse_keys){
     });
 }
 
+/*
+* iterate and update the board
+* @param board {object} board status
+* @param lines {Arrays} direction for the manipulate
+*   like [Array[4]....] Array[4] equa [a1,b1,c1,d1]....
+* */
 function fold_board(board, lines){
     //copy reference
     var new_board = board;
-    lines.forEach(function(line){
-        var new_line = fold_line(board, line);
+    lines.forEach(function(line){ // read the child of the board collections
+        var new_line = fold_line(board, line); // fold_line the child of the fold_board
         Object.keys(new_line).forEach(function(key){
             //mutate reference while building up board
             new_board = set_tile(new_board, key, new_line[key]);
@@ -127,6 +133,8 @@ function set_tile(board, where, tile){
     return new_board;
 } // set new tile on the boad
 
+// defined the direction logic. why define the queue of the array
+// actually direction return  is a instance of board
 var left = fold_order(["a","b","c","d"], ["1","2","3","4"], false);
 var right = fold_order(["a","b","c","d"], ["4","3","2","1"], false);
 var up = fold_order(["1","2","3","4"], ["a","b","c","d"], true);
@@ -134,17 +142,18 @@ var down = fold_order( ["1","2","3","4"], ["d","c","b","a"], true);
 
 var GameBoard = React.createClass({
     getInitialState: function(){
-        return this.addTile(this.addTile(initial_board));
+        return this.addTile(this.addTile(initial_board)); // chian syntax add initial board
+                                                          // initial is clear all the tile on the board
     }, //initial status
-    keyHandler:function(e){
-        var directions = {
+    keyHandler:function(e){ // handle the heky
+        var directions = { // key map for the direction
             37: left,
             38: up,
             39: right,
             40: down
         };
         if(directions[e.keyCode]
-            && this.setBoard(fold_board(this.state, directions[e.keyCode]))
+            && this.setBoard(fold_board(this.state, directions[e.keyCode])) // update the board only when the keydown invoke
             && Math.floor(Math.random() * 30, 0) > 0){
             setTimeout(function(){
                 this.setBoard(this.addTile(this.state));
@@ -152,19 +161,19 @@ var GameBoard = React.createClass({
         }
     },  // logic for the key handler
     setBoard:function(new_board){
-        if(!same_board(this.state, new_board)){
+        if(!same_board(this.state, new_board)){ // compare the board state
             this.setState(new_board);
             return true;
         }
         return false;
     },
-    addTile:function(board){
+    addTile:function(board){    // add  tile on the board
         var location = available_spaces(board).sort(function() {
-            return .5 - Math.random();
-        }).pop();
-        if(location){
+            return .5 - Math.random();  // random place the tile
+        }).pop();  // pop the last element of the queue for location
+        if(location){   // if have a position
             var two_or_four = Math.floor(Math.random() * 2, 0) ? 2 : 4;
-            return set_tile(board, location, new_tile(two_or_four));
+            return set_tile(board, location, new_tile(two_or_four)); // only add 2/4 on the board
         }
         return board;
     }, // add tile on the board

@@ -84,6 +84,9 @@ function fold_line(board, line){
     return new_line;
 }
 
+/*
+* likely the core function
+* */
 function fold_order(xs, ys, reverse_keys){
     return xs.map(function(x){
         return ys.map(function(y){

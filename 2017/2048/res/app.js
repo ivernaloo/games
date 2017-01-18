@@ -25,10 +25,16 @@ function score_board(board){
     }).reduce(function(a,b){return a+b}, 0);
 }
 
+/*
+* get the value form the last position of the array
+* */
 function tile_value(tile){
     return tile ? tile.values[tile.values.length-1] : null;
 }
 
+/*
+* judge game status
+* */
 function can_move(board){
     var new_board = [up,down,left,right].reduce(function(b, direction){
         return fold_board(b, direction);
@@ -49,9 +55,13 @@ function same_board(board1, board2){
     }, true);
 } // compare tow board
 
+/*
+* fold the same grid
+* */
 function fold_line(board, line){
-    var tiles = line.map(function(key){
-        return board[key]; // trasform key array to value array
+    // tiles is a array collection about the element for occupied
+    var tiles = line.map(function(key){ // traverse the matrix and return the line which contain array data
+        return board[key]; // get the value in the board object
     }).filter(function(tile){
         return tile !== null // filter the occupied position
     });
@@ -62,13 +72,13 @@ function fold_line(board, line){
             var tile = tiles[i];
             if(tile){
                 var val = tile_value(tile);
-                var next_tile = tiles[i+1];
+                var next_tile = tiles[i+1]; // only horizontal fold tile?
                 if(next_tile && val == tile_value(next_tile)){
                     //skip next tile;
                     i++;
                     new_tiles.push({
                         id: next_tile.id, //keep id
-                        values: tile.values.concat([val * 2])
+                        values: tile.values.concat([val * 2]) // combine the tile
                     });
                 }
                 else{
@@ -85,13 +95,16 @@ function fold_line(board, line){
 }
 
 /*
-* likely the core function
+* join axis to coordinate and generate a 4x4 matrix
+* @param xs: x axis
+* @param ys: y axis
+* @param reverse_keys
 * */
 function fold_order(xs, ys, reverse_keys){
-    return xs.map(function(x){
-        return ys.map(function(y){
-            var key = [x,y];
-            if(reverse_keys){
+    return xs.map(function(x){ // traverse x axis
+        return ys.map(function(y){  // traverse y axis
+            var key = [x,y]; // combine axis to coordinate
+            if(reverse_keys){ // reverse the order
                 return key.reverse().join("");
             }
             return key.join("");
@@ -101,15 +114,15 @@ function fold_order(xs, ys, reverse_keys){
 
 /*
 * iterate and update the board
-* @param board {object} board status
-* @param lines {Arrays} direction for the manipulate
+* @param board {object} board status use {} with 16 element describe the status
+* @param lines {Arrays} 4x4 matrix - direction for the manipulate
 *   like [Array[4]....] Array[4] equa [a1,b1,c1,d1]....
 * */
 function fold_board(board, lines){
     //copy reference
-    var new_board = board;
+    var new_board = board;  // cache board status
     lines.forEach(function(line){ // read the child of the board collections
-        var new_line = fold_line(board, line); // fold_line the child of the fold_board
+        var new_line = fold_line(board, line); // collision between line.
         Object.keys(new_line).forEach(function(key){
             //mutate reference while building up board
             new_board = set_tile(new_board, key, new_line[key]);
@@ -126,6 +139,9 @@ function new_tile(initial){
     };
 } // generate new tile
 
+/*
+* set value to the exactly position
+* */
 function set_tile(board, where, tile){
     //do not destory the old board
     var new_board = {};

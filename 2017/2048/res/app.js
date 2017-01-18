@@ -219,6 +219,7 @@ var Tiles = React.createClass({
     render: function(){
         var board = this.props.board;
         //sort board keys first to stop re-ordering of DOM elements
+        // why sort?
         var tiles = used_spaces(board).sort(function(a, b) {
             return board[a].id - board[b].id;
         });

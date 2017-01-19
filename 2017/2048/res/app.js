@@ -63,10 +63,10 @@ function fold_line(board, line){
     var tiles = line.map(function(key){ // traverse the matrix and return the line which contain array data
         return board[key]; // get the value in the board object
     }).filter(function(tile){
-        return tile !== null // filter the occupied position
+        return tile !== null; // filter and return used_space
     });
     var new_tiles = [];
-    if(tiles){  // there are tiles which position were occupied
+    if(tiles){  // used_space
         //must loop so we can skip next if matched
         for(var i=0; i < tiles.length; i++){
             var tile = tiles[i];
@@ -132,6 +132,11 @@ function fold_board(board, lines){
 }
 
 var tile_counter = 0;
+/*
+* create new tiles for the game
+* @param initial {number}  2 or 4
+*   return {object} {id, values}
+* */
 function new_tile(initial){
     return {
         id: tile_counter++,
@@ -147,6 +152,7 @@ function set_tile(board, where, tile){
     var new_board = {};
     Object.keys(board).forEach(function(key, i){
         //copy by reference for structual sharing
+        // equal then set tile or else keep same
         new_board[key] = (key == where) ? tile : board[key];
     });
     return new_board;
@@ -187,6 +193,7 @@ var GameBoard = React.createClass({
         return false;
     },
     addTile:function(board){    // add  tile on the board
+        // find unused_space for add tile
         var location = available_spaces(board).sort(function() {
             return .5 - Math.random();  // random place the tile
         }).pop();  // pop the last element of the queue for location
@@ -204,10 +211,15 @@ var GameBoard = React.createClass({
     }, // react lifecycle
     render:function(){
         var status = !can_move(this.state)?" - Game Over!":"";
+
+        /*
+        * state : {} object contain 16 element response for the position of the matrix
+        *
+        * */
         return <div className="app">
-            <span className="score">
-            Score: {score_board(this.state)}{status}
-        </span>
+                <span className="score">
+                    Score: {score_board(this.state)}{status}
+                </span>
         <Tiles board={this.state}/>
         <button onClick={this.newGame}>New Game</button>
         </div>
@@ -219,7 +231,8 @@ var Tiles = React.createClass({
     render: function(){
         var board = this.props.board;
         //sort board keys first to stop re-ordering of DOM elements
-        // why sort?
+        // why sort? set big in front
+        //  used space collection to fill  the board
         var tiles = used_spaces(board).sort(function(a, b) {
             return board[a].id - board[b].id;
         });

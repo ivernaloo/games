@@ -1,0 +1,16 @@
+{
+  "name": "2048evo",
+  "version": "1.0.0",
+  "description": "2017.1.19\r 2048的改进版本",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "browser-sync": "^2.18.6",
+    "gulp": "^3.9.1",
+    "gulp-livereload": "^3.8.1"
+  }
+}

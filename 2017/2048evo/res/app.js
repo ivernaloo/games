@@ -27,17 +27,31 @@ function available_spaces(board){
 * @param {object} board - board object collection
 * */
 function addTile(board){
+       // get a random place for set the tile
        var location = available_spaces(board).sort(function(){
               return 0.5 - Math.random();
-       });
+       }).sort();
 
-       console.log("location : ", location);
-       // random set tile
+       if(location){
+              var two_or_four = Math.floor(Math.random() * 2, 0) ? 2 : 4; // random generate the 2,4
+              var _board = newTile(board, location, two_or_four);
+              console.log("add :", _board);
+       }
 
        // available_spaces/random location/random 2,4
        return board;
 }
 
+/*
+* add tile on the place
+* @param {object} board - status
+* @param {location} string - the location of board
+* @param tile position
+* @return new board status
+* */
+function newTile(board, location, value){
+
+}
 
 var GameBoard = React.createClass({
        getInitialState: function(){
@@ -60,7 +74,7 @@ var Tiles = React.createClass({
               var tiles = Object.keys(board); // translate objec to array
               return <div className="board">{
                      tiles.map(function(key){
-                            return <span className={key}>{key}</span>;
+                            return <span className={key}>{board[key]}</span>;
                      })
               }</div>
        }

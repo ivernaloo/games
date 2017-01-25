@@ -30,12 +30,14 @@ function addTile(board){
        // get a random place for set the tile
        var location = available_spaces(board).sort(function(){
               return 0.5 - Math.random();
-       }).sort();
+       }).pop();
 
        if(location){
               var two_or_four = Math.floor(Math.random() * 2, 0) ? 2 : 4; // random generate the 2,4
               var _board = newTile(board, location, two_or_four);
               console.log("add :", _board);
+
+              return _board;
        }
 
        // available_spaces/random location/random 2,4
@@ -50,7 +52,9 @@ function addTile(board){
 * @return new board status
 * */
 function newTile(board, location, value){
-
+       console.log("location : ", location)
+       board[location] = value;
+       return board;
 }
 
 var GameBoard = React.createClass({

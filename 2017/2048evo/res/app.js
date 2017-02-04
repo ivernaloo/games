@@ -35,7 +35,6 @@ function addTile(board){
        if(location){
               var two_or_four = Math.floor(Math.random() * 2, 0) ? 2 : 4; // random generate the 2,4
               var _board = newTile(board, location, two_or_four);
-              console.log("add :", _board);
 
               return _board;
        }
@@ -52,14 +51,19 @@ function addTile(board){
 * @return new board status
 * */
 function newTile(board, location, value){
-       console.log("location : ", location)
-       board[location] = value;
-       return board;
+       var new_board = {};
+       Object.keys(board).forEach(function(key, i){
+              new_board[key] = (key == location) ? value : board[key];
+       });
+       return new_board;
 }
 
 var GameBoard = React.createClass({
        getInitialState: function(){
-              return addTile(initial_board);
+              return addTile(initial_board);  // 这里不直接返回initial_board，还要addTile是因为需要在空面板上加一个tile。
+       },
+       newGame: function(){
+              this.setState(this.getInitialState());
        },
        render : function(){
               return <div className="app">
@@ -68,7 +72,7 @@ var GameBoard = React.createClass({
                             </span>
                             Hello world
                             <Tiles board={this.state}/>
-                            <button>New Game</button>
+                            <button onClick={this.newGame}>New Game</button>
                      </div>;
        }
 });

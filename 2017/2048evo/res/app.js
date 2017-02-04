@@ -58,12 +58,94 @@ function newTile(board, location, value){
        return new_board;
 }
 
+function fold_board(board, lines){
+       //copy reference
+       var new_board = board;  // cache board status
+       lines.forEach(function(line){ // read the child of the board collections
+              var new_line = fold_line(board, line); // collision between line.
+              console.log("new_line : ", new_line)
+              Object.keys(new_line).forEach(function(key){
+                     //mutate reference while building up board
+                     // new_board = set_tile(new_board, key, new_line[key]);
+              });
+       });
+       return new_board;
+}
+
+function fold_order(xs, ys, reverse_keys){
+       return xs.map(function(x){ // traverse x axis
+              return ys.map(function(y){  // traverse y axis
+                     var key = [x,y]; // combine axis to coordinate
+                     if(reverse_keys){ // reverse the order
+                            return key.reverse().join("");
+                     }
+                     return key.join("");
+              });
+       });
+}
+function fold_line(board, line){
+       // tiles is a array collection about the element for occupied
+       var tiles = line.map(function(key){ // traverse the matrix and return the line which contain array data
+              return board[key]; // get the value in the board object
+       }).filter(function(tile){
+              return tile !== null; // filter and return used_space
+       });
+       var new_tiles = [];
+       if(tiles){
+
+              for(var i=0; i<tiles.length; i++){
+                     var tile = tiles[i];
+                     if(tile){
+                            var next_tile = tiles[i+1];
+                            if(next_tile && tile == next_tile ){
+                                   new_tiles.push( tile * 2)
+                            }
+                            else {
+                                   new_tiles.push(tile)
+                            }
+                     }
+              }
+       }
+
+       var new_line = {};
+       line.forEach(function(key, i){
+              new_line[key] = new_tiles[i] || null;
+       });
+       return new_line;
+}
+
+function tile_value(tile){
+       console.log("tile : ", tile);
+       return tile ? tile.values[tile.values.length-1] : null;
+}
+
+var left = fold_order(["a","b","c","d"], ["1","2","3","4"], false);
+var right = fold_order(["a","b","c","d"], ["4","3","2","1"], false);
+var up = fold_order(["1","2","3","4"], ["a","b","c","d"], true);
+var down = fold_order( ["1","2","3","4"], ["d","c","b","a"], true);
+
 var GameBoard = React.createClass({
        getInitialState: function(){
               return addTile(initial_board);  // 这里不直接返回initial_board，还要addTile是因为需要在空面板上加一个tile。
        },
        newGame: function(){
               this.setState(this.getInitialState());
+       },
+       keyHandler: function(e){
+              var directions = {
+                     37: left,
+                     38: up,
+                     39: right,
+                     40: down
+              };
+
+              // combine nearby
+              // fold_board(this.state, directions[e.keyCode])
+
+              // set new position
+       },
+       componentDidMount: function(){
+              window.addEventListener("keydown", this.keyHandler, false)
        },
        render : function(){
               return <div className="app">

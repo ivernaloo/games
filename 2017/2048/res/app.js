@@ -184,8 +184,8 @@ var GameBoard = React.createClass({
                 this.setBoard(this.addTile(this.state));
             }.bind(this), 100);
         }
-    },  // logic for the key handler
-    setBoard:function(new_board){
+    },
+    setBoard:function(new_board){ // compare the status now and before. logic for the key handler
         if(!same_board(this.state, new_board)){ // compare the board state
             this.setState(new_board);
             return true;

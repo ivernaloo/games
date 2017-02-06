@@ -58,15 +58,24 @@ function newTile(board, location, value){
        return new_board;
 }
 
+/*
+* set the value the status
+* */
+function set_tile(board, key, value){
+       var new_board = board;
+       if(key && value){
+              new_board[key] = value;
+       }
+       return new_board
+}
+
 function fold_board(board, lines){
        //copy reference
        var new_board = board;  // cache board status
        lines.forEach(function(line){ // read the child of the board collections
               var new_line = fold_line(board, line); // collision between line.
-              console.log("new_line : ", new_line)
               Object.keys(new_line).forEach(function(key){
-                     //mutate reference while building up board
-                     // new_board = set_tile(new_board, key, new_line[key]);
+                     new_board = set_tile(new_board, key, new_line[key]);
               });
        });
        return new_board;
@@ -83,7 +92,8 @@ function fold_order(xs, ys, reverse_keys){
               });
        });
 }
-function fold_line(board, line){
+
+function fold_line(board, line){ // :board/line两个参数，然后在找出里面有内容的tile，同时检测相临的需不需要合并，然后按顺序放入到返回值new_line中，这是一个{}对象，把得到对应的line值去重合并以后依次放到其中
        // tiles is a array collection about the element for occupied
        var tiles = line.map(function(key){ // traverse the matrix and return the line which contain array data
               return board[key]; // get the value in the board object
@@ -92,13 +102,12 @@ function fold_line(board, line){
        });
        var new_tiles = [];
        if(tiles){
-
               for(var i=0; i<tiles.length; i++){
                      var tile = tiles[i];
                      if(tile){
                             var next_tile = tiles[i+1];
                             if(next_tile && tile == next_tile ){
-                                   new_tiles.push( tile * 2)
+                                   new_tiles.push( tile * 2)// Merge adjacent
                             }
                             else {
                                    new_tiles.push(tile)
@@ -114,6 +123,31 @@ function fold_line(board, line){
        return new_line;
 }
 
+/*
+* @param board1 {Object} board object contain a1,a2,a3,a4
+* */
+function same_board(board1, board2){
+       /*
+       * ret : last result
+       * key : current value
+       * */
+       var flag = true;
+       Object.keys(board1).forEach(function(key){
+              console.log("board1 : ", board1)
+              console.log("board2 : " ,board2)
+              if (board1[key] != board2[key]){
+                     flag = false;
+              }
+       })
+
+       return flag;
+} // compare tow board
+
+function available_spaces(board){
+       return Object.keys(board).filter(function(key){
+              return board[key] == null // find the vacant position
+       });
+}
 function tile_value(tile){
        console.log("tile : ", tile);
        return tile ? tile.values[tile.values.length-1] : null;
@@ -131,6 +165,13 @@ var GameBoard = React.createClass({
        newGame: function(){
               this.setState(this.getInitialState());
        },
+       setBoard:function(new_board){ // compare the status now and before. logic for the key handler
+              if(!same_board(this.state, new_board)){ // compare the board state
+                     this.setState(new_board);
+                     return true;
+              }
+              return false;
+       },
        keyHandler: function(e){
               var directions = {
                      37: left,
@@ -140,9 +181,32 @@ var GameBoard = React.createClass({
               };
 
               // combine nearby
-              // fold_board(this.state, directions[e.keyCode])
+              if (directions[e.keyCode] && fold_board(this.state, directions[e.keyCode])){
+                     setTimeout(function(){
+                            console.log("new_board : ", this.addTile(this.state))
+                            this.setBoard(this.addTile(this.state));
+                     }.bind(this), 100);
+              }
+
 
               // set new position
+       },
+       /*
+       * add a tile on the board
+       * @param {object} board
+       * @return {object} board
+       * */
+       addTile: function(board){
+              var location = available_spaces(board).sort(function(){
+                     return 0.5 - Math.random();
+              }).pop();
+
+              if (location){
+                     var two_or_four = Math.floor(Math.random() * 2, 0) ? 2 : 4;
+                     return set_tile(board, location, two_or_four)
+              }
+
+              return board;
        },
        componentDidMount: function(){
               window.addEventListener("keydown", this.keyHandler, false)

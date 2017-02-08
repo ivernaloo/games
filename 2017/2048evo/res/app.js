@@ -27,6 +27,7 @@ function available_spaces(board){
 * @param {object} board - board object collection
 * */
 function addTile(board){
+       // 有个问题，这个是直接在原来的board上进行操作的
        // get a random place for set the tile
        var location = available_spaces(board).sort(function(){
               return 0.5 - Math.random();
@@ -34,9 +35,9 @@ function addTile(board){
 
        if(location){
               var two_or_four = Math.floor(Math.random() * 2, 0) ? 2 : 4; // random generate the 2,4
-              var _board = newTile(board, location, two_or_four);
+              board = set_tile(board, location, two_or_four); // 这个地方和原来不一样
 
-              return _board;
+              return board;
        }
 
        // available_spaces/random location/random 2,4
@@ -59,14 +60,18 @@ function newTile(board, location, value){
 }
 
 /*
-* set the value the status
+* add tile on the place
+* @param {object} board - status
+* @param {location} string - the location of board
+* @param tile position
+* @return new board status
 * */
-function set_tile(board, key, value){
-       var new_board = board;
-       if(key && value){
-              new_board[key] = value;
-       }
-       return new_board
+function set_tile(board, location, value){
+       var new_board = {};
+       Object.keys(board).forEach(function(key, i){
+              new_board[key] = (key == location) ? value : board[key];
+       });
+       return new_board;
 }
 
 function fold_board(board, lines){
@@ -78,6 +83,7 @@ function fold_board(board, lines){
                      new_board = set_tile(new_board, key, new_line[key]);
               });
        });
+
        return new_board;
 }
 
@@ -101,6 +107,7 @@ function fold_line(board, line){ // :board/line两个参数，然后在找出里
               return tile !== null; // filter and return used_space
        });
        var new_tiles = [];
+
        if(tiles){
               for(var i=0; i<tiles.length; i++){
                      var tile = tiles[i];
@@ -131,16 +138,10 @@ function same_board(board1, board2){
        * ret : last result
        * key : current value
        * */
-       var flag = true;
-       Object.keys(board1).forEach(function(key){
-              console.log("board1 : ", board1)
-              console.log("board2 : " ,board2)
-              if (board1[key] != board2[key]){
-                     flag = false;
-              }
-       })
+       return Object.keys(board1).reduce(function(ret, key){
+              return ret && board1[key] == board2[key]; // compare the value and return to the callback ret
+       }, true);
 
-       return flag;
 } // compare tow board
 
 function available_spaces(board){
@@ -181,10 +182,10 @@ var GameBoard = React.createClass({
               };
 
               // combine nearby
-              if (directions[e.keyCode] && fold_board(this.state, directions[e.keyCode])){
+              if (directions[e.keyCode] && this.setBoard(fold_board(this.state, directions[e.keyCode]))){
                      setTimeout(function(){
-                            console.log("new_board : ", this.addTile(this.state))
-                            this.setBoard(this.addTile(this.state));
+                            var a = this.addTile(this.state)
+                            this.setBoard(a); // 为什么直接setState以后
                      }.bind(this), 100);
               }
 
@@ -197,16 +198,17 @@ var GameBoard = React.createClass({
        * @return {object} board
        * */
        addTile: function(board){
-              var location = available_spaces(board).sort(function(){
+              var _board = board;
+              var location = available_spaces(_board).sort(function(){
                      return 0.5 - Math.random();
-              }).pop();
+              }).pop();     // 随机生成一个location
 
               if (location){
                      var two_or_four = Math.floor(Math.random() * 2, 0) ? 2 : 4;
-                     return set_tile(board, location, two_or_four)
+                     return set_tile(_board, location, two_or_four)
               }
 
-              return board;
+              return _board;
        },
        componentDidMount: function(){
               window.addEventListener("keydown", this.keyHandler, false)

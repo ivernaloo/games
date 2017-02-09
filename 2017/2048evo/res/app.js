@@ -231,7 +231,7 @@ var Tiles = React.createClass({
               var tiles = Object.keys(board); // translate objec to array
               return <div className="board">{
                      tiles.map(function(key){
-                            return <span className={key}>{board[key]}</span>;
+                            return <span className={key + " value" + board[key]}>{board[key]}</span>;
                      })
               }</div>
        }

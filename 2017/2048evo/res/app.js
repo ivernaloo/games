@@ -115,6 +115,7 @@ function fold_line(board, line){ // :board/line两个参数，然后在找出里
                             var next_tile = tiles[i+1];
                             if(next_tile && tile == next_tile ){
                                    new_tiles.push( tile * 2)// Merge adjacent
+                                   ++i;
                             }
                             else {
                                    new_tiles.push(tile)
